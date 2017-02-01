@@ -1,0 +1,11 @@
+h1 {
+  color: red;
+}
+
+.chart {
+  border: 1px solid black;
+  display: block;
+}
+rect {
+  fill: blue;
+}
