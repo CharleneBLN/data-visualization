@@ -1,5 +1,6 @@
 "use strict";
 
+var description = '';
 var margin = {top: 20, right: 30, bottom: 30, left: 40};
 var height = 600 - margin.top - margin.bottom;
 var width = 1200 - margin.left - margin.right;
@@ -9,6 +10,10 @@ var prepareChart = function() {
   d3.select('body').append('svg')
   .attr('width', width + margin.left + margin.right)
   .attr('height', height + margin.top + margin.bottom);
+
+  d3.select('body').append('p')
+    .html(description);
+
   d3.select('svg').append('g')
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
   .attr('class', 'chart');
@@ -36,7 +41,7 @@ var displayChart = function(dataSet) {
     return parseTime(d[0]);
   });
 
-  var scaleTime = d3.scaleLinear()
+  var scaleTime = d3.scaleTime()
     .domain(extentTime)
     .range([0, width]);
 
@@ -44,15 +49,15 @@ var displayChart = function(dataSet) {
 
   // y scale and axis
 
-  var extentGross = d3.extent(dataSet, function(d) {
+  var maxGross = d3.max(dataSet, function(d) {
     return d[1];
   });
 
   var scaleGross = d3.scaleLinear()
-    .domain(extentGross)
+    .domain([0, maxGross])
     .range([height, 0]);
 
-  var yAxis = d3.axisLeft(scaleGross).ticks([10]);
+  var yAxis = d3.axisLeft(scaleGross);
 
   // construct chart
 
@@ -75,20 +80,22 @@ var displayChart = function(dataSet) {
     .attr("transform", "translate(0,"+height+")")
     .call(xAxis);
 
-  // d3.select(".x-axis").append("g")
-  //   .attr("class", "tick")
-  //   .call(xTicks);
-
   //Set Y Axis
 
-
   chartSelector.append('g')
-    .call(yAxis);
+    .attr('class', 'y-axis')
+    .call(yAxis)
+    .append('text')
+    .text('Gross Domestic Product, USA')
+    .attr('class', 'y-label').attr('transform', 'rotate(-90)')
+    .attr('y', margin.left);
+
 
 };
 
 d3.json('https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/GDP-data.json', displayChart)
 .response(function(response) {
   var result = JSON.parse(response.responseText);
+  description = result.description;
   return result.data;
 });
