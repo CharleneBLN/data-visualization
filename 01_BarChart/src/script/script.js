@@ -52,7 +52,8 @@ var setTooltip = function(chart) {
   var tooltip =  chart.append('g')
     .attr('class', 'tooltip')
     .style("visibility", "hidden")
-    .on("mouseover", function(){tooltip.style("visibility", "visible")});
+    .on("mouseover", function(){tooltip.style("visibility", "visible")})
+    .on("mouseout", function(){tooltip.style("visibility", "hidden")});
 
   tooltip.append('rect')
     .attr('class','tooltip-background')
