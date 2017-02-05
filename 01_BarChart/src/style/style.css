@@ -1,3 +1,6 @@
+body {
+  font-size: 20px;
+}
 svg {
   display: block;
   margin: auto;
@@ -35,18 +38,18 @@ svg {
 
 .info-header {
   fill: #00334d;
-  font-size: 0.8em;
+  font-size: 0.9em;
   font-weight: bold;
 }
 
 .info-date {
   fill: #00334d;
-  font-size: 0.7em;
+  font-size: 0.8em;
 }
 
 .x-axis,
 .y-axis {
-  font-size: 1em;
+  font-size: 0.9em;
 }
 
 .y-label {

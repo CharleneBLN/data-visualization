@@ -125,8 +125,8 @@ var displayChart = function(dataSet) {
 
   var infoBackground = infoBar.append('rect')
     .attr('class','info-background')
-    .attr('width', 170)
-    .attr('height', 50)
+    .attr('width', '10em')
+    .attr('height', '2.5em')
     .attr('rx', 5)
     .attr('ry', 5);
 
