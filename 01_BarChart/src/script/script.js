@@ -1,86 +1,43 @@
 "use strict";
 
-var description = '';
-var margin = {top: 20, right: 150, bottom: 80, left: 150};
+var margin = {top: 20, right: 200, bottom: 80, left: 200};
 var height = 800 - margin.top - margin.bottom;
 var width = 1500 - margin.left - margin.right;
 
-// append title
-d3.select('body').append('h1')
-  .text('Gross Domestic Product')
-  .attr('class', 'title');
+var setChart = function(description) {
 
-  //append graph
-var svg = d3.select('body').append('svg')
-  .attr('width', width + margin.left + margin.right)
-  .attr('height', height + margin.top + margin.bottom);
+  var body = d3.select('body');
 
-var prepareChart = function() {
-
-  //description of the graph
-  d3.select('body').append('p')
-    .attr('class', 'description')
-    .html(description);
-
+  // append title
+  body.append('h1')
+    .text('Gross Domestic Product')
+    .attr('class', 'title');
 
   //append svg container
-  d3.select('body').append('svg')
+  body.append('svg')
     .attr('width', width + margin.left + margin.right)
     .attr('height', height + margin.top + margin.bottom);
 
+  //description of the graph
+  body.append('p')
+    .attr('class', 'description')
+    .html(description);
+
   //append graph
-  svg.append('g')
+  d3.select('svg').append('g')
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
   .attr('class', 'chart');
 
 };
 
+var setAxis = function(chart, xAxis, yAxis) {
 
-var displayChart = function(dataSet) {
-
-  prepareChart();
-
-  //display Bars in Chart
-
-  var chartSelector = d3.select('.chart');
-
-  var barSelector = chartSelector.selectAll('.bar');
-
-  // x scale and axis variables
-
-  var barWidth = width / dataSet.length;
-
-  var parseTime = d3.timeParse("%Y-%m-%d");
-  var formatInfo = d3.timeFormat("%Y-%B");
-
-  var extentTime = d3.extent(dataSet, function(d) {
-    return parseTime(d[0]);
-  });
-
-  var scaleTime = d3.scaleTime()
-    .domain(extentTime)
-    .range([0, width]);
-
-  var xAxis = d3.axisBottom(scaleTime);
-
-  chartSelector.append('g')
+  chart.append('g')
     .attr("class", "x-axis")
     .attr("transform", "translate(0,"+height+")")
     .call(xAxis);
 
-  // y scale and axis
-
-  var maxGross = d3.max(dataSet, function(d) {
-    return d[1];
-  });
-
-  var scaleGross = d3.scaleLinear()
-    .domain([0, maxGross])
-    .range([height, 0]);
-
-  var yAxis = d3.axisLeft(scaleGross);
-
-  chartSelector.append('g')
+  chart.append('g')
     .attr('class', 'y-axis')
     .call(yAxis)
     .append('text')
@@ -88,66 +45,99 @@ var displayChart = function(dataSet) {
     .attr('class', 'y-label').attr('transform', 'rotate(-90)')
     .attr('y', 30)
     .attr('x', 0);
+};
 
-  // display info on bar hovering
+var setTooltip = function(chart) {
 
-  var enterBar = barSelector.data(dataSet).enter();
-
-  // construct chart
-
-  enterBar.append('rect')
-    .attr('class', 'bar')
-    .attr('value', function(d) {return d[1]})
-    .attr('width', barWidth)
-    .attr('height', function(d){
-      return height - scaleGross(d[1]);
-    })
-    .attr('y', function(d){
-      return scaleGross(d[1]);
-    })
-    .attr('x', function(d){
-      return scaleTime(parseTime(d[0]));
-    })
-    .on("mouseover", function(d){
-        infoBar.attr("transform", "translate(" + (scaleTime(parseTime(d[0])) - 75) + "," + (scaleGross(d[1]) - 60 + 0.6*(height - scaleGross(d[1]))) +")");
-        infoBar.style("visibility", "visible");
-        infoHeader.text('$' + d[1] + ' Billion');
-        infoDate.text(formatInfo(parseTime(d[0])));
-    })
-    .on("mouseout", function() {
-        infoBar.style("visibility", "hidden");
-    });
-
-  var infoBar =  chartSelector.append('g')
-    .attr('class', 'info')
+  var tooltip =  chart.append('g')
+    .attr('class', 'tooltip')
     .style("visibility", "hidden")
-    .on("mouseover", function(){infoBar.style("visibility", "visible")});
+    .on("mouseover", function(){tooltip.style("visibility", "visible")});
 
-  var infoBackground = infoBar.append('rect')
-    .attr('class','info-background')
+  tooltip.append('rect')
+    .attr('class','tooltip-background')
     .attr('width', '10em')
     .attr('height', '2.5em')
     .attr('rx', 5)
     .attr('ry', 5);
 
-  var infoHeader = infoBar.append('text')
-    .attr('class', 'info-header')
+  tooltip.append('text')
+    .attr('class', 'tooltip-header')
     .attr('x', 20)
     .attr('y', 20)
-    .text('billion')
-    .style("color","black");
+    .text('billion');
 
-  var infoDate = infoBar.append('text')
-    .attr('class', 'info-date')
+  tooltip.append('text')
+    .attr('class', 'tooltip-date')
     .attr('x', 20)
     .attr('y', 40)
     .text('date');
+};
+
+var displayData = function(data) {
+
+  setChart(data.description);
+
+  //define selectors
+  var svg = d3.select('svg');
+  var chart = d3.select('.chart');
+  var bar = chart.selectAll('.bar');
+
+  var dataSet = data.data;
+
+  //x data scale
+  var parseTime = d3.timeParse("%Y-%m-%d");
+  var extentTime = d3.extent(dataSet, function(d) {
+    return parseTime(d[0]);
+  });
+  var scaleTime = d3.scaleTime()
+    .domain(extentTime)
+    .range([0, width]);
+
+  //y data scale
+  var maxGDP = d3.max(dataSet, function(d) {
+    return d[1];
+  });
+  var scaleGDP = d3.scaleLinear()
+    .domain([0, maxGDP])
+    .range([height, 0]);
+
+  setAxis(chart, d3.axisBottom(scaleTime), d3.axisLeft(scaleGDP));
+
+  var enterBar = bar.data(dataSet).enter();
+  var formatInfo = d3.timeFormat("%Y-%B");
+
+  //Enter data
+
+  var createBar = enterBar.append('rect')
+    .attr('class', 'bar')
+    .attr('value', function(d) {return d[1]})
+    .attr('width', width/dataSet.length)
+    .attr('height', function(d){
+      return height - scaleGDP(d[1]);
+    })
+    .attr('y', function(d){
+      return scaleGDP(d[1]);
+    })
+    .attr('x', function(d){
+      return scaleTime(parseTime(d[0]));
+    });
+
+  setTooltip(chart);
+
+  createBar.on("mouseover", function(d){
+      d3.select('.tooltip').attr("transform", "translate(" + (scaleTime(parseTime(d[0])) - 75) + "," + (scaleGDP(d[1]) - 60 + 0.6*(height - scaleGDP(d[1]))) +")");
+      d3.select('.tooltip').style("visibility", "visible");
+      d3.select('.tooltip-header').text('$' + d[1] + ' Billion');
+      d3.select('.tooltip-date').text(formatInfo(parseTime(d[0])));
+    })
+    .on("mouseout", function() {
+      d3.select('.tooltip').style("visibility", "hidden");
+    });
 
 };
 
-d3.json('https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/GDP-data.json', displayChart)
+d3.json('https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/GDP-data.json', displayData)
 .response(function(response) {
-  var result = JSON.parse(response.responseText);
-  description = result.description;
-  return result.data;
+  return JSON.parse(response.responseText);
 });

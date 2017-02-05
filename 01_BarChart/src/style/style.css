@@ -31,18 +31,18 @@ svg {
   width: 1200px;
 }
 
-.info-background {
+.tooltip-background {
   stroke: #00334d;
   fill: #cccccc;
 }
 
-.info-header {
+.tooltip-header {
   fill: #00334d;
   font-size: 0.9em;
   font-weight: bold;
 }
 
-.info-date {
+.tooltip-date {
   fill: #00334d;
   font-size: 0.8em;
 }
